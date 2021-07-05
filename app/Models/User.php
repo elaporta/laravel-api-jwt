@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Scopes\NotDeletedScope;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -45,6 +46,23 @@ class User extends Authenticatable implements JWTSubject
         'created_at' => 'datetime:Y-m-d H:i:s',
         'updated_at' => 'datetime:Y-m-d H:i:s',
     ];
+
+    /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        // Applying Global Scope
+        static::addGlobalScope(new NotDeletedScope);
+
+        // OR
+        // Applying Anonymous Global Scope
+        // static::addGlobalScope('NotDeletedScope', function ($query) {
+        //     return $query->where('status', '!=', 'deleted');
+        // });
+    }
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.

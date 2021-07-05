@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+// Dependencies
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Validator;
+
+// Models
 use App\Models\User;
+
+// Scopes
+use App\Scopes\NotDeletedScope;
 
 class UserController extends Controller
 {
@@ -66,9 +72,10 @@ class UserController extends Controller
             unset($parameters['first']);
         }
 
-        // Set status if not present
-        if(!isset($parameters['status'])){
-            $qb->where('status', 'active');
+        // If deleted status is present
+        if(isset($parameters['status']) && $parameters['status'] == 'deleted'){
+            // Remove NotDeletedScope
+            $qb->withoutGlobalScope(NotDeletedScope::class);
         }
 
         // Set where clauses
@@ -137,7 +144,7 @@ class UserController extends Controller
         }
 
         // Find user
-        $data = User::where('status', 'active')->where('id', $parameters['id'])->first();
+        $data = User::where('id', $parameters['id'])->first();
 
         if(!isset($data)){
             return response()->json(['error' => 'User does not exist'], 400);
@@ -166,7 +173,7 @@ class UserController extends Controller
         $user = request()->user();
 
         // Find user
-        $data = User::where('id', '<>', $user->id)->where('status', 'active')->where('id', $parameters['id'])->first();
+        $data = User::where('id', '<>', $user->id)->where('id', $parameters['id'])->first();
 
         if(!isset($data)){
             return response()->json(['error' => 'User does not exist'], 400);
@@ -174,15 +181,6 @@ class UserController extends Controller
 
         // Update in DB
         $data->fill($parameters)->save();
-
-        // Logout user
-        $token = auth()->tokenById($data->id);
-
-        if($token){
-            // TODO invalidate deleted user token
-            // The next line invalidates the current auth token, not the target user token
-            // auth()->invalidate($token);
-        }
 
         return response()->json(['message' => 'Success'], 200);
     }

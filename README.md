@@ -23,6 +23,7 @@
 
 ## To do
 
-* Delete user method: invalidate target user tokens
+* Longer token TTL with Remember me
 * User forgot & reset password with laravel
+* User email verify
 * Entity routes/controller/validations/model/migration examples

@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+// Dependencies
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Validator;
+
+// Models
 use App\Models\User;
 
 class AuthController extends Controller
@@ -16,7 +19,6 @@ class AuthController extends Controller
      */
     public function login(){
         $parameters = request(['email', 'password']);
-        $parameters['status'] = 'active';
 
         $token = auth()->attempt($parameters);
 
