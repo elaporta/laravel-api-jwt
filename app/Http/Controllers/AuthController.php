@@ -19,10 +19,28 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function login(){
+        // Exclude data from request
         $parameters = request(['email', 'password']);
         $parameters['status'] = 'active';
 
-        $token = auth()->attempt($parameters);
+        // Validator
+        $validator = Validator::make(request(['email', 'password', 'remember_me']), [
+            'email'=> 'required|email',
+            'password'=> 'required|string|min:8|regex:/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[`!@#$%&*()_{};:,.<>?~])([a-zA-Z0-9`!@#$%&*()_{};:,.<>?~]){8,}$/',
+            'remember_me'=>'nullable|boolean'
+        ]);
+
+        // Validator response
+        if($validator->fails()){
+            return response()->json(['error' => 'Bad request', 'message' => $validator->errors()], 400);
+        }
+
+        // Set ttl
+        $remember_me = request()->remember_me;
+        $ttl = $remember_me === true ? config('jwt.refresh_ttl') : config('jwt.ttl');
+
+        // Set token
+        $token = auth()->setTTL($ttl)->attempt($parameters);
 
         if(!$token){
             return response()->json(['error' => 'Unauthorized'], 401);
@@ -87,7 +105,7 @@ class AuthController extends Controller
         ]);
 
         // Validator response
-        if ($validator->fails()) {
+        if($validator->fails()){
             return response()->json(['error' => 'Bad request', 'message' => $validator->errors()], 400);
         }
 
