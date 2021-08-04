@@ -25,9 +25,9 @@ class AuthController extends Controller
 
         // Validator
         $validator = Validator::make(request(['email', 'password', 'remember_me']), [
-            'email'=> 'required|email',
-            'password'=> 'required|string|min:8|regex:/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[`!@#$%&*()_{};:,.<>?~])([a-zA-Z0-9`!@#$%&*()_{};:,.<>?~]){8,}$/',
-            'remember_me'=>'nullable|boolean'
+            'email'=> ['required', 'email'],
+            'password'=> ['required', 'string', 'min:8', 'max:16', 'regex:/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[`!@#$%&*()_{};:,.<>?~])([a-zA-Z0-9`!@#$%&*()_{};:,.<>?~]){8,}$/'],
+            'remember_me'=> ['nullable', 'boolean']
         ]);
 
         // Validator response
@@ -101,7 +101,7 @@ class AuthController extends Controller
         $validator = Validator::make($parameters, [
             'name' => ['required', 'string', 'min:1', 'max:255'],
             'email' => ['required', 'email', 'unique:users'],
-            'password'=> ['required', 'string', 'min:8', 'max:16', 'regex:/^(?=.{8,16}$)[a-zA-Z0-9_.-]+$/', 'confirmed']
+            'password'=> ['required', 'string', 'min:8', 'max:16', 'regex:/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[`!@#$%&*()_{};:,.<>?~])([a-zA-Z0-9`!@#$%&*()_{};:,.<>?~]){8,}$/', 'confirmed']
         ]);
 
         // Validator response

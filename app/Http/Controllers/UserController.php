@@ -103,7 +103,7 @@ class UserController extends Controller
         $validator = Validator::make($parameters, [
             'name' => ['required', 'string', 'min:1', 'max:255'],
             'email' => ['required', 'email', 'unique:users'],
-            'password'=> ['required', 'string', 'min:8', 'max:16', 'regex:/^(?=.{8,16}$)[a-zA-Z0-9_.-]+$/'],
+            'password'=> ['required', 'string', 'min:8', 'max:16', 'regex:/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[`!@#$%&*()_{};:,.<>?~])([a-zA-Z0-9`!@#$%&*()_{};:,.<>?~]){8,}$/'],
             'role' => ['required', 'string', 'in:admin,client']
         ]);
 
@@ -138,7 +138,7 @@ class UserController extends Controller
             'id' => ['required', 'integer', 'min:1'],
             'name' => ['string', 'min:1', 'max:255'],
             'email' => ['email', 'unique:users'],
-            'password'=> ['string', 'min:8', 'max:16', 'regex:/^(?=.{8,16}$)[a-zA-Z0-9_.-]+$/'],
+            'password'=> ['string', 'min:8', 'max:16', 'regex:/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[`!@#$%&*()_{};:,.<>?~])([a-zA-Z0-9`!@#$%&*()_{};:,.<>?~]){8,}$/'],
             'role' => ['string', 'in:admin,client']
         ]);
 
