@@ -230,4 +230,5 @@ return [
 
     ],
 
+	'verify_email' => (bool) env('VERIFY_EMAIL', false),
 ];

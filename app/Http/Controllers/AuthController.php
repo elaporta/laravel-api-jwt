@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Validator;
+use Illuminate\Auth\Events\Registered;
 
 // Models
 use App\Models\User;
@@ -19,6 +20,7 @@ class AuthController extends Controller
      */
     public function login(){
         $parameters = request(['email', 'password']);
+        $parameters['status'] = 'active';
 
         $token = auth()->attempt($parameters);
 
@@ -34,8 +36,8 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function whoami(){
-        return response()->json(auth()->user());
+    public function profile(){
+        return response()->json(['data' => auth()->user()], 200);
     }
 
     /**
@@ -46,7 +48,7 @@ class AuthController extends Controller
     public function logout(){
         auth()->logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json(['message' => 'Successfully logged out'], 200);
     }
 
     /**
@@ -70,7 +72,7 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60
-        ]);
+        ], $statusCode);
     }
 
     public function signup(){
@@ -86,7 +88,7 @@ class AuthController extends Controller
 
         // Validator response
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 401);
+            return response()->json(['error' => 'Bad request', 'message' => $validator->errors()], 400);
         }
 
         // Hash password
@@ -95,15 +97,24 @@ class AuthController extends Controller
         // Create in DB
         $newUser = User::create($parameters);
 
+        // Fire registered event for email confirmation
+		if(config('app.verify_email')){
+			event(new Registered($newUser));
+		}
+		else{
+			$newUser->markEmailAsVerified();
+		}
+
         // Get the token
         $token = auth()->login($newUser);
 
         // Response
         if(!$token){
-            return response()->json($newUser, 201);
+            return response()->json(['message' => 'Success', 'data' => $newUser], 201);
         }
         else{
             return $this->respondToken($token, 201);
         }
     }
+
 }

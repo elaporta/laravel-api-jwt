@@ -21,8 +21,9 @@ class ClientsSeeder extends Seeder
 
         for($i = 0; $i < 10; $i++) {
             $clients[] = [
-                'name' => $faker->name,
+                'name' => $faker->firstName,
                 'email' => $faker->email,
+				'email_verified_at' => date('Y-m-d H:i:s'),
                 'password' => Hash::make('Client12.'),
                 'role' => 'client'
             ];

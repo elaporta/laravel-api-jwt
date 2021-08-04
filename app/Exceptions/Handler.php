@@ -6,6 +6,7 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Routing\Exceptions\InvalidSignatureException;
 
 class Handler extends ExceptionHandler
 {
@@ -58,7 +59,11 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        $debug = config('app.debug');
+		if($exception instanceof InvalidSignatureException) {
+			return response()->json(['error' => 'Invalid signature'], 403);
+		}
+
+		$debug = config('app.debug');
 
         if($debug){
             return parent::render($request, $exception);

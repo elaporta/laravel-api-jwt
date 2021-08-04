@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Validator;
+use Illuminate\Auth\Events\Registered;
 
 // Models
 use App\Models\User;
@@ -29,7 +30,7 @@ class UserController extends Controller
 
         // Validator response
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 401);
+            return response()->json(['error'=> 'Bad request', 'message' => $validator->errors()], 400);
         }
 
         return $this->getUsers($parameters);
@@ -51,7 +52,7 @@ class UserController extends Controller
 
         // Validator response
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 401);
+            return response()->json(['error'=> 'Bad request', 'message' => $validator->errors()], 400);
         }
 
         return $this->getUsers($parameters);
@@ -62,7 +63,7 @@ class UserController extends Controller
         $user = request()->user();
 
         // Query builder
-        $qb = User::where('id', '<>', $user->id);
+        $qb = User::where('id', '!=', $user->id);
 
         // Set first flag
         $first = false;
@@ -108,7 +109,7 @@ class UserController extends Controller
 
         // Validator response
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 401);
+            return response()->json(['error'=> 'Bad request', 'message' => $validator->errors()], 400);
         }
 
         // Hash password
@@ -117,7 +118,15 @@ class UserController extends Controller
         // Create in DB
         $data = User::create($parameters);
 
-        return response()->json(['data' => $data], 201);
+        // Fire registered event for email confirmation
+		if(config('app.verify_email')){
+	        event(new Registered($data));
+		}
+		else{
+			$data->markEmailAsVerified();
+		}
+
+        return response()->json(['message' => 'Success', 'data' => $data], 201);
     }
 
     public function update(){
@@ -135,7 +144,7 @@ class UserController extends Controller
 
         // Validator response
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 401);
+            return response()->json(['error'=> 'Bad request', 'message' => $validator->errors()], 400);
         }
 
         // Hash password
@@ -147,13 +156,13 @@ class UserController extends Controller
         $data = User::where('id', $parameters['id'])->first();
 
         if(!isset($data)){
-            return response()->json(['error' => 'User does not exist'], 400);
+            return response()->json(['error'=> 'Bad request', 'message' => 'User does not exist'], 400);
         }
 
         // Update in DB
         $data->fill($parameters)->save();
 
-        return response()->json(['data' => $data], 200);
+        return response()->json(['message' => 'Success', 'data' => $data], 200);
     }
 
     public function delete($id){
@@ -166,17 +175,17 @@ class UserController extends Controller
 
         // Validator response
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 401);
+            return response()->json(['error'=> 'Bad request', 'message' => $validator->errors()], 400);
         }
 
         // Get current user
         $user = request()->user();
 
         // Find user
-        $data = User::where('id', '<>', $user->id)->where('id', $parameters['id'])->first();
+        $data = User::where('id', '!=', $user->id)->where('id', $parameters['id'])->first();
 
         if(!isset($data)){
-            return response()->json(['error' => 'User does not exist'], 400);
+            return response()->json(['error'=> 'Bad request', 'message' => 'User does not exist'], 400);
         }
 
         // Update in DB

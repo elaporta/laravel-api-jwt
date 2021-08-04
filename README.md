@@ -23,7 +23,7 @@
 
 ## To do
 
+* Soft delete models using Laravel SoftDeletes
 * Longer token TTL with Remember me
 * User forgot & reset password with laravel
-* User email verify
 * Entity routes/controller/validations/model/migration examples
