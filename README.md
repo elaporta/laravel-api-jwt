@@ -26,3 +26,4 @@
 * Soft delete models using Laravel SoftDeletes
 * User forgot & reset password with laravel
 * Entity routes/controller/validations/model/migration examples
+* File upload system and example
